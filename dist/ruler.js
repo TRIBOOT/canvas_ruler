@@ -376,69 +376,70 @@ ruler.prototype.rulerConstructor = function (_canvas, options, rulDimension) {
     // console.log('rulScale', rulScale);
     // console.log('rulLenngth', rulLength);
     //
-    // var deltaPerStep = (50 / rulScale) / 10;
+    var deltaPerStep = (50 / rulScale) / 10;
     // var stepIndex = 1;
-    //
-    //
-    // for(var pos = 0;pos <=rulLength; pos += deltaPerStep){
+    var maxPoints = Math.round(rulLength /deltaPerStep);
+
+    // mache nur so viele steps, wie du brauchst, um das ende des Lineals zu erreichen
+    for(var pos = 0;pos <=maxPoints; pos += 1){
+      delta = ((rulLength / 2) - pos);
+      if(pos % 10 === 0){
+        pointLength = lineLengthMax;
+        // Umrechnung in Millimeter
+        // Braucht wieder umrechnung in centimeter
+        label =  pos * 5 / 10;
+        draw = true;
+      }
+      else if(pos % 1 === 0){
+        pointLength = lineLengthMed;
+        label = '';
+        draw = true;
+      }
+      else
+      {
+        pointLength = lineLengthMin;
+        draw = false
+        label = '';
+      }
+
+      if(draw) {
+        context.moveTo((pos * deltaPerStep)+ 0.5, rulThickness + 0.5);
+        context.lineTo((pos * deltaPerStep) + 0.5, pointLength + 0.5);
+        context.fillText(label, (pos * deltaPerStep) + 1.5, (rulThickness / 2) + 1);
+      }
+
+      // stepIndex++;
+    }
+
+    // console.log(stepIndex);
+
+    // for (var pos = 0; pos <= rulLength; pos += 1) {
     //   delta = ((rulLength / 2) - pos);
-    //   if(stepIndex % 50 === 0){
+    //   // console.log("delta", delta);
+    //   draw = false;
+    //   label = '';
+    //
+    //   if (delta % 50 === 0) {
     //     pointLength = lineLengthMax;
-    //     // label =  Math.round(pos);
-    //     // label =  (stepIndex/10 * 5);
-    //     label =  delta;
+    //     label = Math.round(Math.abs(delta) * rulScale);
     //     draw = true;
-    //   }
-    //   else if(stepIndex % 1 === 0){
+    //   } else if (delta % 25 === 0) {
     //     pointLength = lineLengthMed;
     //     label = '';
     //     draw = true;
+    //   } else if (delta % 5 === 0) {
+    //     pointLength = lineLengthMin;
+    //     label = '';
+    //     draw = true;
     //   }
-    //   // else
-    //   // {
-    //   //   pointLength = lineLengthMin;
-    //   //   draw = false
-    //   //   label = '';
-    //   // }
+    //   var deltaPerStep = (5 / rulScale) / 10;
     //
-    //   if(draw) {
+    //   if (draw) {
     //     context.moveTo(pos + 0.5, rulThickness + 0.5);
     //     context.lineTo(pos + 0.5, pointLength + 0.5);
     //     context.fillText(label, pos + 1.5, (rulThickness / 2) + 1);
     //   }
-    //
-    //   stepIndex++;
     // }
-
-    // console.log(stepIndex);
-
-    for (var pos = 0; pos <= rulLength; pos += 1) {
-      delta = ((rulLength / 2) - pos);
-      // console.log("delta", delta);
-      draw = false;
-      label = '';
-
-      if (delta % 50 === 0) {
-        pointLength = lineLengthMax;
-        label = Math.round(Math.abs(delta) * rulScale);
-        draw = true;
-      } else if (delta % 25 === 0) {
-        pointLength = lineLengthMed;
-        label = '';
-        draw = true;
-      } else if (delta % 5 === 0) {
-        pointLength = lineLengthMin;
-        label = '';
-        draw = true;
-      }
-      var deltaPerStep = (5 / rulScale) / 10;
-
-      if (draw) {
-        context.moveTo(pos + 0.5, rulThickness + 0.5);
-        context.lineTo(pos + 0.5, pointLength + 0.5);
-        context.fillText(label, pos + 1.5, (rulThickness / 2) + 1);
-      }
-    }
   };
 
   var mousemove = function (e) {
