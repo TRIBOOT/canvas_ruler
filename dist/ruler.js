@@ -4,7 +4,7 @@ var ruler = function (options) {
   this.api.constructRulers.call(this, options);
 };
 
-ruler.prototype.builder = function(){
+ruler.prototype.builder = function () {
   var VERTICAL = 1,
     HORIZONTAL = 2,
     CUR_DELTA_X = 0,
@@ -102,11 +102,10 @@ ruler.prototype.builder = function(){
     guide = theRulerDOM.appendChild(guide);
     if (dimension === VERTICAL) {
       guide.style.left = ruler.prototype.utils.pixelize(x - options.container.getBoundingClientRect().left);
-      if (isSet) guide.style.left = ruler.prototype.utils.pixelize( Math.round( x / CUR_SCALE ) + options.rulerHeight );
-    }
-    else {
+      if (isSet) guide.style.left = ruler.prototype.utils.pixelize(Math.round(x / CUR_SCALE) + options.rulerHeight);
+    } else {
       guide.style.top = ruler.prototype.utils.pixelize(y - options.container.getBoundingClientRect().top);
-      if (isSet) guide.style.top = ruler.prototype.utils.pixelize( Math.round( y / CUR_SCALE ) + options.rulerHeight );
+      if (isSet) guide.style.top = ruler.prototype.utils.pixelize(Math.round(y / CUR_SCALE) + options.rulerHeight);
     }
     guides.push({
       dimension: dimension,
@@ -202,8 +201,7 @@ ruler.prototype.builder = function(){
         orgY = curRul.canvas.style.top;
         curRul.canvas.style.top = ruler.prototype.utils.pixelize(curRul.orgPos + (parseInt(values.y)));
         deltaY = parseInt(orgY) - parseInt(curRul.canvas.style.top);
-      }
-      else {
+      } else {
         orgX = curRul.canvas.style.left;
         curRul.canvas.style.left = ruler.prototype.utils.pixelize(curRul.orgPos + (parseInt(values.x)));
         deltaX = parseInt(orgX) - parseInt(curRul.canvas.style.left);
@@ -213,8 +211,7 @@ ruler.prototype.builder = function(){
       if (guide.dimension === HORIZONTAL) {
         guide.line.guideLine.style.top = ruler.prototype.utils.pixelize(parseInt(guide.line.guideLine.style.top) - deltaY);
         guide.line.curPosDelta(parseInt(values.y));
-      }
-      else {
+      } else {
         guide.line.guideLine.style.left = ruler.prototype.utils.pixelize(parseInt(guide.line.guideLine.style.left) - deltaX);
         guide.line.curPosDelta(parseInt(values.x));
       }
@@ -239,10 +236,9 @@ ruler.prototype.builder = function(){
         curPos = parseInt(guide.line.guideLine.style.top);
         orgDelta = options.rulerHeight + 1;
         curScaleFac = (parseFloat(newScale) / guide.line.curScale());
-        guide.line.guideLine.style.top = ruler.prototype.utils.pixelize(((curPos - orgDelta - CUR_DELTA_Y ) / curScaleFac) + orgDelta + CUR_DELTA_Y);
+        guide.line.guideLine.style.top = ruler.prototype.utils.pixelize(((curPos - orgDelta - CUR_DELTA_Y) / curScaleFac) + orgDelta + CUR_DELTA_Y);
         guide.line.curScale(newScale);
-      }
-      else {
+      } else {
         curPos = parseInt(guide.line.guideLine.style.left);
         orgDelta = options.rulerHeight + 1;
         curScaleFac = (parseFloat(newScale) / guide.line.curScale());
@@ -289,7 +285,9 @@ ruler.prototype.builder = function(){
   };
 
   var setGuides = function (_guides) {
-    if(!_guides){return}
+    if (!_guides) {
+      return
+    }
     _guides.forEach(function (guide) {
       constructGuide(guide.dimension, guide.posX, guide.posY, null, true)
     })
@@ -324,137 +322,173 @@ ruler.prototype.builder = function(){
 };
 
 
+ruler.prototype.rulerConstructor = function (_canvas, options, rulDimension) {
+
+  var canvas = _canvas,
+    context = canvas.getContext('2d'),
+    rulThickness = 0,
+    rulLength = 0,
+    rulScale = 1,
+    dimension = rulDimension || 2,
+    orgPos = 0,
+    tracker = document.createElement('div');
+
+  var getLength = function () {
+    return rulLength;
+  };
+
+  var getThickness = function () {
+    return rulThickness;
+  };
+
+  var getScale = function () {
+    return rulScale;
+  };
+
+  var setScale = function (newScale) {
+    rulScale = parseFloat(newScale);
+    drawPoints();
+    return rulScale;
+  };
+
+  var drawRuler = function (_rulerLength, _rulerThickness, _rulerScale) {
+    rulLength = canvas.width = _rulerLength * 4;
+    rulThickness = canvas.height = _rulerThickness;
+    rulScale = _rulerScale || rulScale;
+    context.strokeStyle = options.strokeStyle;
+    context.font = options.fontSize + ' ' + options.fontFamily;
+    context.lineWidth = options.lineWidth;
+    context.beginPath();
+    drawPoints();
+    context.stroke();
+  };
 
 
-ruler.prototype.rulerConstructor =  function(_canvas, options, rulDimension)
-{
+  var drawPoints = function () {
+    var pointLength = 0,
+      label = '',
+      delta = 0,
+      draw = false,
+      lineLengthMax = 0,
+      lineLengthMed = rulThickness / 2,
+      lineLengthMin = rulThickness / 2;
 
-    var canvas = _canvas,
-        context = canvas.getContext('2d'),
-        rulThickness = 0,
-        rulLength = 0,
-        rulScale = 1,
-        dimension = rulDimension || 2,
-        orgPos = 0,
-        tracker = document.createElement('div');
+    // console.log('rulScale', rulScale);
+    // console.log('rulLenngth', rulLength);
+    //
+    // var deltaPerStep = (50 / rulScale) / 10;
+    // var stepIndex = 1;
+    //
+    //
+    // for(var pos = 0;pos <=rulLength; pos += deltaPerStep){
+    //   delta = ((rulLength / 2) - pos);
+    //   if(stepIndex % 50 === 0){
+    //     pointLength = lineLengthMax;
+    //     // label =  Math.round(pos);
+    //     // label =  (stepIndex/10 * 5);
+    //     label =  delta;
+    //     draw = true;
+    //   }
+    //   else if(stepIndex % 1 === 0){
+    //     pointLength = lineLengthMed;
+    //     label = '';
+    //     draw = true;
+    //   }
+    //   // else
+    //   // {
+    //   //   pointLength = lineLengthMin;
+    //   //   draw = false
+    //   //   label = '';
+    //   // }
+    //
+    //   if(draw) {
+    //     context.moveTo(pos + 0.5, rulThickness + 0.5);
+    //     context.lineTo(pos + 0.5, pointLength + 0.5);
+    //     context.fillText(label, pos + 1.5, (rulThickness / 2) + 1);
+    //   }
+    //
+    //   stepIndex++;
+    // }
 
-    var getLength = function (){
-        return rulLength;
-    };
+    // console.log(stepIndex);
 
-    var getThickness = function(){
-        return rulThickness;
-    };
+    for (var pos = 0; pos <= rulLength; pos += 1) {
+      delta = ((rulLength / 2) - pos);
+      // console.log("delta", delta);
+      draw = false;
+      label = '';
 
-    var getScale = function(){
-        return rulScale;
-    };
-
-    var setScale = function(newScale){
-        rulScale = parseFloat(newScale);
-        drawPoints();
-        return rulScale;
-    };
-
-    var drawRuler = function (_rulerLength, _rulerThickness, _rulerScale){
-        rulLength = canvas.width = _rulerLength * 4;
-        rulThickness = canvas.height = _rulerThickness;
-        rulScale = _rulerScale || rulScale;
-        context.strokeStyle = options.strokeStyle;
-        context.font = options.fontSize + ' ' + options.fontFamily;
-        context.lineWidth = options.lineWidth;
-        context.beginPath();
-        drawPoints();
-        context.stroke();
-    };
-
-
-
-    var drawPoints = function () {
-        var  pointLength = 0,
-            label = '',
-            delta = 0,
-            draw = false,
-            lineLengthMax = 0,
-            lineLengthMed = rulThickness / 2,
-            lineLengthMin = rulThickness / 2;
-
-        for (var pos = 0; pos <= rulLength; pos += 1) {
-            delta = ((rulLength / 2) - pos);
-            draw = false;
-            label = '';
-
-            if (delta % 50 === 0) {
-                pointLength = lineLengthMax;
-                label = Math.round(Math.abs(delta)*rulScale);
-                draw = true;
-            }
-            else if (delta % 25 === 0) {
-                pointLength = lineLengthMed;
-                draw = true;
-            }
-            else if (delta % 5 === 0) {
-                pointLength = lineLengthMin;
-                draw = true;
-            }
-            if (draw) {
-                context.moveTo(pos + 0.5, rulThickness + 0.5);
-                context.lineTo(pos + 0.5, pointLength +  0.5);
-                context.fillText(label, pos + 1.5, (rulThickness / 2) + 1);
-            }
-        }
-    };
-
-    var mousemove = function(e) {
-      var posX = e.clientX;
-      var posY = e.clientY;
-      if(dimension === 2){
-        tracker.style.left = ruler.prototype.utils.pixelize(posX - parseInt(options.container.getBoundingClientRect().left));
+      if (delta % 50 === 0) {
+        pointLength = lineLengthMax;
+        label = Math.round(Math.abs(delta) * rulScale);
+        draw = true;
+      } else if (delta % 25 === 0) {
+        pointLength = lineLengthMed;
+        label = '';
+        draw = true;
+      } else if (delta % 5 === 0) {
+        pointLength = lineLengthMin;
+        label = '';
+        draw = true;
       }
-      else{
-        tracker.style.top = ruler.prototype.utils.pixelize(posY - parseInt(options.container.getBoundingClientRect().top)) ;
+      var deltaPerStep = (5 / rulScale) / 10;
+
+      if (draw) {
+        context.moveTo(pos + 0.5, rulThickness + 0.5);
+        context.lineTo(pos + 0.5, pointLength + 0.5);
+        context.fillText(label, pos + 1.5, (rulThickness / 2) + 1);
       }
-    };
+    }
+  };
 
-    var destroy = function(){
-      options.container.removeEventListener('mousemove', mousemove);
-      tracker.parentNode.removeChild(tracker);
-      this.clearListeners && this.clearListeners();
+  var mousemove = function (e) {
+    var posX = e.clientX;
+    var posY = e.clientY;
+    if (dimension === 2) {
+      tracker.style.left = ruler.prototype.utils.pixelize(posX - parseInt(options.container.getBoundingClientRect().left));
+    } else {
+      tracker.style.top = ruler.prototype.utils.pixelize(posY - parseInt(options.container.getBoundingClientRect().top));
+    }
+  };
 
-    };
+  var destroy = function () {
+    options.container.removeEventListener('mousemove', mousemove);
+    tracker.parentNode.removeChild(tracker);
+    this.clearListeners && this.clearListeners();
 
-    var initTracker = function(){
-        tracker = options.container.appendChild(tracker);
-        ruler.prototype.utils.addClasss(tracker, 'rul_tracker');
-        var height = ruler.prototype.utils.pixelize(options.rulerHeight);
-        if(dimension === 2){
-            tracker.style.height = height;
-        }
-        else{
-            tracker.style.width = height;
-        }
+  };
 
-        options.container.addEventListener('mousemove', mousemove);
-    };
-
-    if(options.enableMouseTracking){
-        initTracker();
+  var initTracker = function () {
+    tracker = options.container.appendChild(tracker);
+    ruler.prototype.utils.addClasss(tracker, 'rul_tracker');
+    var height = ruler.prototype.utils.pixelize(options.rulerHeight);
+    if (dimension === 2) {
+      tracker.style.height = height;
+    } else {
+      tracker.style.width = height;
     }
 
+    options.container.addEventListener('mousemove', mousemove);
+  };
 
-    return{
-        getLength: getLength,
-        getThickness: getThickness,
-        getScale: getScale,
-        setScale: setScale,
-        dimension: dimension,
-        orgPos: orgPos,
-        canvas: canvas,
-        context: context,
-        drawRuler: drawRuler,
-        drawPoints: drawPoints,
-        destroy: destroy
-    }
+  if (options.enableMouseTracking) {
+    initTracker();
+  }
+
+
+  return {
+    getLength: getLength,
+    getThickness: getThickness,
+    getScale: getScale,
+    setScale: setScale,
+    dimension: dimension,
+    orgPos: orgPos,
+    canvas: canvas,
+    context: context,
+    drawRuler: drawRuler,
+    drawPoints: drawPoints,
+    destroy: destroy
+  }
 };
 
 
@@ -471,7 +505,7 @@ ruler.prototype.guideLine = function (line, _dragContainer, lineDimension, optio
     dragContainer = _dragContainer,
     dimension = lineDimension || 2,
     moveCB = moveCB || function () {
-      };
+    };
 
 
   var curPosDelta = function (val) {
@@ -567,8 +601,7 @@ ruler.prototype.guideLine = function (line, _dragContainer, lineDimension, optio
   var updateToolTip = function (x, y) {
     if (y) {
       guideLine.dataset.tip = 'Y: ' + Math.round((y - options.rulerHeight - 1 - _curPosDelta) * _curScale) + ' px';
-    }
-    else {
+    } else {
       guideLine.dataset.tip = 'X: ' + Math.round((x - options.rulerHeight - 1 - _curPosDelta) * _curScale) + ' px';
     }
   };
@@ -613,7 +646,7 @@ ruler.prototype.guideLine = function (line, _dragContainer, lineDimension, optio
   guideLine.addEventListener('mouseup', mouseup);
 
   guideLine.addEventListener('dblclick', dblclick);
-  if(event) draggable.startMoving(event);
+  if (event) draggable.startMoving(event);
 
   self = {
     setAsDraggable: draggable,
@@ -635,44 +668,42 @@ ruler.prototype.guideLine = function (line, _dragContainer, lineDimension, optio
  * Created by maor.frankel on 5/25/15.
  */
 ruler.prototype.utils = {
-    extend: function extend(){
-        for(var i=1; i< arguments.length; i++)
-            for(var key in arguments[i])
-                if(arguments[i].hasOwnProperty(key))
-                    arguments[0][key] = arguments[i][key];
-        return arguments[0];
-    },
-    pixelize: function (val){
-        return val + 'px';
-    },
-    prependChild: function (container, element){
-        return container.insertBefore(element,container.firstChild);
-    },
-    addClasss: function (element, classNames){
-        if(!(classNames instanceof Array))
-        {
-            classNames = [classNames];
-        }
-
-        classNames.forEach(function (name){
-            element.className += ' ' + name;
-        });
-
-        return element;
-
-    },
-    removeClasss: function (element, classNames){
-        var curCalsss = element.className;
-        if(!(classNames instanceof Array))
-        {
-            classNames = [classNames];
-        }
-
-        classNames.forEach(function (name){
-            curCalsss = curCalsss.replace(name, '');
-        });
-        element.className = curCalsss;
-        return element;
-
+  extend: function extend() {
+    for (var i = 1; i < arguments.length; i++)
+      for (var key in arguments[i])
+        if (arguments[i].hasOwnProperty(key))
+          arguments[0][key] = arguments[i][key];
+    return arguments[0];
+  },
+  pixelize: function (val) {
+    return val + 'px';
+  },
+  prependChild: function (container, element) {
+    return container.insertBefore(element, container.firstChild);
+  },
+  addClasss: function (element, classNames) {
+    if (!(classNames instanceof Array)) {
+      classNames = [classNames];
     }
-} ;
+
+    classNames.forEach(function (name) {
+      element.className += ' ' + name;
+    });
+
+    return element;
+
+  },
+  removeClasss: function (element, classNames) {
+    var curCalsss = element.className;
+    if (!(classNames instanceof Array)) {
+      classNames = [classNames];
+    }
+
+    classNames.forEach(function (name) {
+      curCalsss = curCalsss.replace(name, '');
+    });
+    element.className = curCalsss;
+    return element;
+
+  }
+};
