@@ -373,44 +373,63 @@ ruler.prototype.rulerConstructor = function (_canvas, options, rulDimension) {
       lineLengthMed = rulThickness / 2,
       lineLengthMin = rulThickness / 2;
 
-    // console.log('rulScale', rulScale);
-    // console.log('rulLenngth', rulLength);
-    //
-    var deltaPerStep = (50 / rulScale) / 10;
-    // var stepIndex = 1;
-    var maxPoints = Math.round(rulLength /deltaPerStep);
+    // do ten steps between each mark
+    // then calculate how much space and value each step needs
+    // then get the maximum number of points
+    var distanceBetweenLabeledMarks = 50;
+    var stepsInBetween = 10;
+    var diffPerMark = distanceBetweenLabeledMarks / stepsInBetween;
+    var positionDeltaPerStep = (distanceBetweenLabeledMarks / rulScale) / stepsInBetween;
+    var maxPoints = (rulLength /positionDeltaPerStep);
 
-    // mache nur so viele steps, wie du brauchst, um das ende des Lineals zu erreichen
+    // to always have 0 / 0 at the top left of the image, calculate the offset error made by rounding
+    // this will shift the ruler according to the error made by rounding
+    var middlePointIndexOffset = (maxPoints - Math.floor(maxPoints)) / 2;
+
+    //now calculate the position offset on the ruler
+    var middlePointPositionOffset = middlePointIndexOffset * positionDeltaPerStep;
+
+    // get the overall offset to set 0 into the middle of the canvas
+    delta = ((rulLength * rulScale) / 2);
+
+    // since we want to have our marks in certain steps (here : 5), we shift the values back to the next 5
+    // steps like 2->7->12 would be steps of 5 too, but we want to have 0->5->10 etc.
+    var valueOffset = delta % diffPerMark;
+
+    // if the maxPoints is not an even number, we get another offset
+    if(Math.floor(maxPoints/2) !== Math.round(maxPoints/2)) {
+      var missingSteps = (maxPoints/2) - Math.floor(maxPoints/2);
+      middlePointPositionOffset = missingSteps * positionDeltaPerStep;
+    }
+
+    // only do as many steps a needed
     for(var pos = 0;pos <=maxPoints; pos += 1){
-      delta = ((rulLength / 2) - pos);
-      if(pos % 10 === 0){
+      var value = Math.round(delta - (pos * diffPerMark) - valueOffset) * -1;
+
+      // do big marks every distanceBetweenLabeledMarks steps
+      if(value % distanceBetweenLabeledMarks === 0){
         pointLength = lineLengthMax;
-        // Umrechnung in Millimeter
-        // Braucht wieder umrechnung in centimeter
-        label =  pos * 5 / 10;
-        draw = true;
-      }
-      else if(pos % 1 === 0){
-        pointLength = lineLengthMed;
-        label = '';
+        label =  value;
         draw = true;
       }
       else
       {
-        pointLength = lineLengthMin;
-        draw = false
+        // do small mark
+        pointLength = lineLengthMed;
+        draw = true;
         label = '';
       }
 
+      //draw
       if(draw) {
-        context.moveTo((pos * deltaPerStep)+ 0.5, rulThickness + 0.5);
-        context.lineTo((pos * deltaPerStep) + 0.5, pointLength + 0.5);
-        context.fillText(label, (pos * deltaPerStep) + 1.5, (rulThickness / 2) + 1);
+        context.moveTo(pos * positionDeltaPerStep + middlePointPositionOffset, rulThickness + 0.5);
+        context.lineTo(pos * positionDeltaPerStep+ middlePointPositionOffset, pointLength + 0.5);
+        context.fillText(label, (pos * positionDeltaPerStep) + 1.5 + middlePointPositionOffset, (rulThickness / 2) + 1);
       }
-
-      // stepIndex++;
     }
 
+
+    //OLD VARIANT FOR REFERENCE
     // console.log(stepIndex);
 
     // for (var pos = 0; pos <= rulLength; pos += 1) {
