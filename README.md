@@ -1,9 +1,11 @@
+# TRIBOOTs Fork
+This is a fork from "mrfrankel.github.io/ruler/". We just modified a possibility, that the rulers unit is fixed at 5 steps per mm.
+
 ruler.js
 ======
 
 ### Demo
 <a href="https://mrfrankel.github.io/ruler/">Demo Page</a>
-
 
 ruler.js is an HTML5 ruler plugin that provides a set of 'photoshop' like rulers to surround the 'stage' of your authoring tools.
 No jquery!
